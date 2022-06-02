@@ -1,8 +1,10 @@
 autopep8==1.6.0
 darkdetect==0.6.0
+maturin==0.12.18
 Pillow==9.1.1
 pycodestyle==2.8.0
 PySimpleGUI==4.60.0
 sv-ttk==0.1
 toml==0.10.2
+tomli==2.0.1
 ttkthemes==3.2.2
