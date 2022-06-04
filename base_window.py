@@ -2,14 +2,19 @@
 import ctypes as ct
 import platform
 import tkinter as tk
-from tkinter import CENTER, END, TOP, ttk
-from tkinter.filedialog import askopenfilename, asksaveasfilename
+from tkinter import TOP, ttk
 
 # External imports
 import darkdetect
+import Rust_Vault_Encryption as rve
 import sv_ttk
-import ttkthemes
+
+# Workspace imports
+import functions
 import vault as vobj
+from add_vault_window import Vault_Window
+from password_input_window import Password_Input
+from vault_name_window import Vault_Name
 
 
 class Base_Window(tk.Tk):
@@ -21,7 +26,9 @@ class Base_Window(tk.Tk):
         self.DARK = darkdetect.isDark()
         self.LAST_LABEL = None
         self.UNLOCK_BUTTON = None
-        self.VAULTS = []
+        self.VAULTS = functions.load_vaults()
+        self.LABELS = []
+        self.CURRENT_VAULT = None
 
         ### Create window ###
         if self.WINDOWS:
@@ -49,17 +56,43 @@ class Base_Window(tk.Tk):
         self.add_vault_button()
         self.open_folder_button()
 
-        self.VAULTS.append(vobj.test_obj(0, 'data0', 0))
-        self.VAULTS.append(vobj.test_obj(1, 'data1', 1))
-        self.VAULTS.append(vobj.test_obj(2, 'data2', 0))
-        self.VAULTS.append(vobj.test_obj(3, 'data3', 0))
-
         self.pop_vaults()
 
         # change title bar to dark on windows if os
         # is in dark mode
         if self.WINDOWS and self.DARK:
             self.dark_title_bar()
+
+    def create_vault(self, result):
+        name = Vault_Name().show()
+        if name:
+            password = Password_Input().show()
+            if password:
+                rve.create_masterfile(result[1], password)
+                self.VAULTS.append(vobj.Vault(
+                    name, f'{result[1]}/masterfile.e', rve.hash_password_string(password)))
+                functions.write_vaults(self.VAULTS)
+                self.pop_vaults()
+
+    def add_vault(self, result):
+        name = Vault_Name().show()
+        path = result[1]
+        if name:
+            password = Password_Input().show()
+            if password:
+                self.VAULTS.append(vobj.Vault(
+                    name, path, rve.hash_password_string(password)))
+                functions.write_vaults(self.VAULTS)
+                self.pop_vaults()
+
+    def vault_stage(self):
+        result = Vault_Window().show()
+        result = result.split(',')
+        if len(result) > 1:
+            if result[0] == 'create':
+                self.create_vault(result)
+            elif result[0] == 'add':
+                self.add_vault(result)
 
     def create_options_frame(self):
         self.options_frm = tk.Frame(
@@ -105,6 +138,7 @@ class Base_Window(tk.Tk):
             self,
             text='Add Vault',
             width=27,
+            command=self.vault_stage,
         )
         self.add_vault_button.grid(
             row=1,
@@ -121,7 +155,9 @@ class Base_Window(tk.Tk):
             relief=tk.RIDGE,
         )
 
-    def change_label(self, i: vobj.test_obj, label_obj: ttk.Label):
+    def change_label(self, i: vobj.Vault, label_obj: ttk.Label):
+        self.CURRENT_VAULT = i
+
         # Change last label if not none and not current object
         if self.LAST_LABEL and self.LAST_LABEL != label_obj:
             self.LAST_LABEL.config(background='white')
@@ -144,26 +180,34 @@ class Base_Window(tk.Tk):
             self.folder_button.grid_forget()
             self.folder_button_label.grid_forget()
         elif i.status == 1:
-            self.lock_unlock_button.config(text="Lock")
+            self.lock_unlock_button.config(
+                text="Lock", command=lambda vault=i: functions.lock_vault(vault))
             self.folder_button.config(text=f'Open Folder')
-            self.folder_button_label.config(text=f'{i.id}')
+            self.folder_button_label.config(text=f'{i.path}')
             self.folder_button.grid(row=1, column=0, pady=(5, 0))
             self.folder_button_label.grid(row=2, column=0)
 
     def pop_vaults(self):
         # Use regular tk on mac because of a problem with
         # mac ttk labels and background color
+        if len(self.LABELS) > 0:
+            for i in self.LABELS:
+                i.pack_forget()
+                i.destroy()
+            self.LABELS = []
+            self.LAST_LABEL = None
         for vault in self.VAULTS:
-            if vault.status == 0:
+            """if vault.status == 0:
                 status = "Locked"
             else:
-                status = "Unlocked"
+                status = "Unlocked"""
+            status = functions.readable_status(vault.status)
             if self.WINDOWS:
                 temp_obj = ttk.Label(self.vault_frm)
             else:
                 temp_obj = tk.Label(self.vault_frm)
             temp_obj.config(
-                text=f'Object {vault.id}\n{vault.data}\n{status}',
+                text=f'{vault.name}\n{vault.path}\n{status}',
                 width=30,
                 background='white',
                 foreground='black',
@@ -177,6 +221,7 @@ class Base_Window(tk.Tk):
                 lambda event, pass_vault=vault, pass_label=temp_obj: self.change_label(
                     pass_vault, pass_label)
             )
+            self.LABELS.append(temp_obj)
 
     def dark_title_bar(self):
         """
