@@ -131,6 +131,7 @@ pub fn create_masterfile(path: String, password: String) -> PyResult<()> {
 /// Returns `MasterfileData`
 ///
 pub fn read_masterfile(path: &str, password: &str) -> Result<MasterfileData, anyhow::Error> {
+    println!("{}", &path);
     // Initialize all byte arrays
     let mut encrypted_folder_salt = [0u8; 48];
     let mut encrypted_folder_nonce = [0u8; 40];
@@ -140,6 +141,7 @@ pub fn read_masterfile(path: &str, password: &str) -> Result<MasterfileData, any
 
     // Open file
     let mut masterfile = fs::File::open(&path).unwrap();
+    println!("Opened File");
 
     // Read all data in
     masterfile.read_exact(&mut masterfile_salt).unwrap();

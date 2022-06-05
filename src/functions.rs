@@ -16,7 +16,7 @@ use std::{
 use crate::{encryptionFunctions, masterfile};
 
 // Set static variable for later thread collection
-static GLOBAL_THREAD_COUNT: AtomicUsize = AtomicUsize::new(0);
+//static GLOBAL_THREAD_COUNT: AtomicUsize = AtomicUsize::new(0);
 
 ///
 /// Instantiate the argon2 config object
@@ -89,6 +89,7 @@ pub fn into_array<T, const N: usize>(v: Vec<T>) -> [T; N] {
 ///
 /// Returns `Result<(), anyhow::Error>`
 ///
+/*
 pub fn dir_recur(
     path: &str,
     data: &masterfile::MasterfileData,
@@ -125,6 +126,7 @@ pub fn dir_recur(
     }
     Ok(())
 }
+*/
 
 ///
 /// Function for encrypting/decrypting directory names. This cannot be called
@@ -162,10 +164,28 @@ fn folder_recur(
 }
 
 #[pyfunction]
-pub fn lock_vault(masterfile_path: String, dirs: Vec<String>, files: Vec<String>) {
-    for f in files {
-        println!("{}", f);
+pub fn lock_vault(
+    masterfile_path: String,
+    dirs: Vec<String>,
+    files: Vec<String>,
+    password: String,
+) -> PyResult<()> {
+    let masterfile_data = masterfile::read_masterfile(&masterfile_path[..], &password[..]).unwrap();
+    println!("Masterfile Read");
+    static GLOBAL_THREAD_COUNT: AtomicUsize = AtomicUsize::new(0);
+    for file_path in files {
+        GLOBAL_THREAD_COUNT.fetch_add(1, Ordering::SeqCst);
+        thread::spawn(move || {
+            encryptionFunctions::encrypt_file(&file_path[..], &masterfile_data.master_key).unwrap();
+
+            // Once recursion is finished, decrement the global thread count
+            GLOBAL_THREAD_COUNT.fetch_sub(1, Ordering::SeqCst);
+        });
     }
+    while GLOBAL_THREAD_COUNT.load(Ordering::SeqCst) != 0 {
+        thread::sleep(Duration::from_millis(1));
+    }
+    Ok(())
 }
 
 ///

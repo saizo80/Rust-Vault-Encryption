@@ -2,6 +2,7 @@
 import os
 import vault as vobj
 import Rust_Vault_Encryption as rve
+from password_input_window import Password_Input
 
 
 def load_vaults() -> list:
@@ -33,7 +34,7 @@ def write_vaults(vaults: list):
 
     with open(config_file, 'w', encoding='utf-8') as file:
         for i in vaults:
-            file.write(f'{i.name},{i.path},{i.hash}\n')
+            file.write(f'{i.name},{i.masterFilePath},{i.hash}\n')
 
 
 def readable_status(status: int) -> str:
@@ -62,4 +63,6 @@ def _get_paths(root_path: str) -> list:
 
 def lock_vault(vault: vobj.Vault):
     file_paths, dir_paths = _get_paths(vault.path)
-    rve.lock_vault(vault.masterFilePath, dir_paths, file_paths)
+    password = Password_Input().show()
+
+    rve.lock_vault(vault.masterFilePath, dir_paths, file_paths, password)
