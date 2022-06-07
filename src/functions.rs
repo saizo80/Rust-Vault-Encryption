@@ -188,6 +188,32 @@ pub fn lock_vault(
     Ok(())
 }
 
+#[pyfunction]
+pub fn unlock_vault(
+    masterfile_path: String,
+    dirs: Vec<String>,
+    files: Vec<String>,
+    password: String,
+) -> PyResult<()> {
+    let masterfile_data = masterfile::read_masterfile(&masterfile_path[..], &password[..]).unwrap();
+    println!("Masterfile Read");
+    static GLOBAL_THREAD_COUNT: AtomicUsize = AtomicUsize::new(0);
+
+    for file_path in files {
+        GLOBAL_THREAD_COUNT.fetch_add(1, Ordering::SeqCst);
+        thread::spawn(move || {
+            encryptionFunctions::decrypt_file(&file_path[..], &masterfile_data.master_key).unwrap();
+
+            // Once recursion is finished, decrement the global thread count
+            GLOBAL_THREAD_COUNT.fetch_sub(1, Ordering::SeqCst);
+        });
+    }
+    while GLOBAL_THREAD_COUNT.load(Ordering::SeqCst) != 0 {
+        thread::sleep(Duration::from_millis(1));
+    }
+    Ok(())
+}
+
 ///
 /// Function for unlocking/locking of a vault. Will call multiple functions
 /// to go through the directory tree.

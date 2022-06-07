@@ -3,6 +3,6 @@
 - [x] Create new vaults
 - [x] Add existing vault
 - [x] Vault name entry
-- [ ] Lock vault
-- [ ] Unlock vault
+- [x] Lock vault
+- [x] Unlock vault
 - [ ] Double password check

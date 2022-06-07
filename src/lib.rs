@@ -20,5 +20,6 @@ fn Rust_Vault_Encryption(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(functions::hash_password_string, m)?)?;
     m.add_function(wrap_pyfunction!(functions::lock_vault, m)?)?;
     m.add_function(wrap_pyfunction!(masterfile::create_masterfile, m)?)?;
+    m.add_function(wrap_pyfunction!(functions::unlock_vault, m)?)?;
     Ok(())
 }

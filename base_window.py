@@ -176,7 +176,8 @@ class Base_Window(tk.Tk):
 
             # Update unlock button text according to vault status
         if i.status == 0:
-            self.lock_unlock_button.config(text="Unlock")
+            self.lock_unlock_button.config(
+                text="Unlock", command=lambda vault=i: functions.unlock_vault(vault))
             self.folder_button.grid_forget()
             self.folder_button_label.grid_forget()
         elif i.status == 1:

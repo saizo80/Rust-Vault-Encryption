@@ -19,10 +19,11 @@ class Vault:
 
         for root, dirs, files in os.walk(self.path):
             for item in files:
-                if item.endswith('.encrypted') and not item.endswith('masterfile.e') and not item.endswith('.DS_Store'):
-                    en += 1
-                else:
-                    de += 1
+                if not item.endswith('masterfile.e') and not item.endswith('.DS_Store'):
+                    if item.endswith('.encrypted'):
+                        en += 1
+                    else:
+                        de += 1
         if en and de:
             # mixed
             self.status = 2

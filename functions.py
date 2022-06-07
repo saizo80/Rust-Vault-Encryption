@@ -66,3 +66,12 @@ def lock_vault(vault: vobj.Vault):
     password = Password_Input().show()
 
     rve.lock_vault(vault.masterFilePath, dir_paths, file_paths, password)
+    vault.check_vault_status()
+
+
+def unlock_vault(vault: vobj.Vault):
+    file_paths, dir_paths = _get_paths(vault.path)
+    password = Password_Input().show()
+
+    rve.unlock_vault(vault.masterFilePath, dir_paths, file_paths, password)
+    vault.check_vault_status()
