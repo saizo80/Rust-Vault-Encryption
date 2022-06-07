@@ -5,4 +5,6 @@
 - [x] Vault name entry
 - [x] Lock vault
 - [x] Unlock vault
+- [ ] Update vault labels after lock/unlock
+- [ ] Encrypt/Decrypt Foldernames
 - [ ] Double password check
