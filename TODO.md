@@ -8,3 +8,4 @@
 - [ ] Update vault labels after lock/unlock
 - [ ] Encrypt/Decrypt Foldernames
 - [ ] Double password check
+- [ ] Change submit button color on enter password and name screens
