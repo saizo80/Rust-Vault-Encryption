@@ -63,6 +63,16 @@ class Base_Window(tk.Tk):
         if self.WINDOWS and self.DARK:
             self.dark_title_bar()
 
+    def lock_vault(self, vault: vobj.Vault):
+        functions.lock_vault(vault)
+        self.change_label(vault, self.LAST_LABEL)
+        # self.pop_vaults()
+
+    def unlock_vault(self, vault: vobj.Vault):
+        functions.unlock_vault(vault)
+        self.change_label(vault, self.LAST_LABEL)
+        # self.pop_vaults()
+
     def create_vault(self, result):
         name = Vault_Name().show()
         if name:
@@ -177,12 +187,12 @@ class Base_Window(tk.Tk):
             # Update unlock button text according to vault status
         if i.status == 0:
             self.lock_unlock_button.config(
-                text="Unlock", command=lambda vault=i: functions.unlock_vault(vault))
+                text="Unlock", command=lambda vault=i: self.unlock_vault(vault))
             self.folder_button.grid_forget()
             self.folder_button_label.grid_forget()
         elif i.status == 1:
             self.lock_unlock_button.config(
-                text="Lock", command=lambda vault=i: functions.lock_vault(vault))
+                text="Lock", command=lambda vault=i: self.lock_vault(vault))
             self.folder_button.config(text=f'Open Folder')
             self.folder_button_label.config(text=f'{i.path}')
             self.folder_button.grid(row=1, column=0, pady=(5, 0))

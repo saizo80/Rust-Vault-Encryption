@@ -45,7 +45,7 @@ def readable_status(status: int) -> str:
     elif status == 0:
         return 'Locked'
     else:
-        return 'Error'
+        return 'No Files Detected'
 
 
 def _get_paths(root_path: str) -> list:
@@ -64,14 +64,14 @@ def _get_paths(root_path: str) -> list:
 def lock_vault(vault: vobj.Vault):
     file_paths, dir_paths = _get_paths(vault.path)
     password = Password_Input().show()
-
-    rve.lock_vault(vault.masterFilePath, dir_paths, file_paths, password)
-    vault.check_vault_status()
+    if password:
+        rve.lock_vault(vault.masterFilePath, dir_paths, file_paths, password)
+        vault.check_vault_status()
 
 
 def unlock_vault(vault: vobj.Vault):
     file_paths, dir_paths = _get_paths(vault.path)
     password = Password_Input().show()
-
-    rve.unlock_vault(vault.masterFilePath, dir_paths, file_paths, password)
-    vault.check_vault_status()
+    if password:
+        rve.unlock_vault(vault.masterFilePath, dir_paths, file_paths, password)
+        vault.check_vault_status()

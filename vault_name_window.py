@@ -1,3 +1,4 @@
+from cgitb import handler
 import ctypes as ct
 import platform
 import tkinter as tk
@@ -47,9 +48,14 @@ class Vault_Name(tk.Tk):
         self.enterbutton.pack(side='left')
         self.quitbutton.pack(side='left')
 
+        self.bind('<Return>', self.handler)
+
     def enter_name(self):
         self.var.set(self.name_entry.get())
         self.destroy()
+
+    def handler(self, e):
+        self.enter_name()
 
     def show(self):
         self.deiconify()

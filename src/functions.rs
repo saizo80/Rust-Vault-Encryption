@@ -171,7 +171,6 @@ pub fn lock_vault(
     password: String,
 ) -> PyResult<()> {
     let masterfile_data = masterfile::read_masterfile(&masterfile_path[..], &password[..]).unwrap();
-    println!("Masterfile Read");
     static GLOBAL_THREAD_COUNT: AtomicUsize = AtomicUsize::new(0);
     for file_path in files {
         GLOBAL_THREAD_COUNT.fetch_add(1, Ordering::SeqCst);
@@ -196,7 +195,6 @@ pub fn unlock_vault(
     password: String,
 ) -> PyResult<()> {
     let masterfile_data = masterfile::read_masterfile(&masterfile_path[..], &password[..]).unwrap();
-    println!("Masterfile Read");
     static GLOBAL_THREAD_COUNT: AtomicUsize = AtomicUsize::new(0);
 
     for file_path in files {

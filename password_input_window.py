@@ -47,8 +47,17 @@ class Password_Input(tk.Tk):
         self.enterbutton.pack(side='left')
         self.quitbutton.pack(side='left')
 
+        self.bind('<Return>', self.handler)
+        self.bind('<Escape>', self.quit_handler)
+
     def enter_password(self):
         self.var.set(self.password_field.get())
+        self.destroy()
+
+    def handler(self, e):
+        self.enter_password()
+
+    def quit_handler(self, e):
         self.destroy()
 
     def show(self):
